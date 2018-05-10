@@ -1,0 +1,25 @@
+{
+	"manifest_version": 2,
+	"name": "Tabhor",
+	"version": "1.0",
+
+	"description": "Chrome extension that color codes your tabs based on time",
+
+	"browser_action": {
+		"default_icon": "icon.png",
+		"default_popup": "popup.html",
+		"default_title": "Tabs Gone Wild!"
+	},
+
+	 "background": {
+	 	"scripts": ["background.js"],
+    	"persistent": false
+  	},
+
+  	"permissions": [
+    "activeTab",
+    "storage",
+    "tabs"
+]
+
+}
