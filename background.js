@@ -4,7 +4,7 @@ so when displaying can get tab id and get current value of the tab\
 */
 
 
-//var urlHash = {};
+var urlHash = {};
 
 /*
 var addToUrlHash = (function (tabId, tabInfo) {
@@ -14,21 +14,19 @@ var addToUrlHash = (function (tabId, tabInfo) {
 	}
 });
 */
-
+/*
 function addToUrlHash(tabId, tabInfo) {
 	var urlHash = {};
-	var counter = 0;
 	function addUrl() {
 		//console.log(urlHash);
-		counter += 1;
 		console.log("here");
 		urlHash[tabId.toString()] = tabInfo.url;
 		console.log(urlHash);
 	}
 	//console.log(urlHash);
-	console.log(counter);
 	return addUrl;
 }
+*/
 
 //need my function to return the url hash and then take in the new one to add
 
@@ -42,12 +40,11 @@ chrome.tabs.onCreated.addListener(function(tabInfo) {
 //when tab is updated - change the url associated with the tabId to the new one
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tabInfo) {
 	if (changeInfo.status === 'complete') {
-		//console.log(urlHash);
-		//urlHash[tabId.toString()] = tabInfo.url;
-		var curUrlHash = addToUrlHash(tabId, tabInfo);
-		curUrlHash();
-		//.log(curUrlHash());
-		//addUrlToList(tabId);
+		console.log(urlHash);
+		urlHash[tabId.toString()] = tabInfo.url;
+		//var curUrlHash = addToUrlHash(tabId, tabInfo);
+		//curUrlHash();
+		addUrlToList(tabId);
 		//console.log(addToUrlHash(tabId, tabInfo));
 	}
 });
