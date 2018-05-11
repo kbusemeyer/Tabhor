@@ -3,36 +3,21 @@ one problem is that it will include new tabs - but tab id is the same
 so when displaying can get tab id and get current value of the tab\
 */
 
-
-var urlHash = {};
-
-/*
-var addToUrlHash = (function (tabId, tabInfo) {
-	var urlHash = {};
-	return function () {
-		urlHash[tabId.toString()] = tabInfo.url;
-	}
-});
-*/
-/*
-function addToUrlHash(tabId, tabInfo) {
-	var urlHash = {};
-	function addUrl() {
-		//console.log(urlHash);
-		console.log("here");
-		urlHash[tabId.toString()] = tabInfo.url;
-		console.log(urlHash);
-	}
-	//console.log(urlHash);
-	return addUrl;
-}
-*/
-
-//need my function to return the url hash and then take in the new one to add
+//adds the url to the urlHash
+var add = (function () {
+    var urlHash = {};
+    return { 
+    	addUrl: function(tabId, tabInfo) {
+    		return urlHash[tabId.toString()] = tabInfo.url;
+    	},
+    	getUrl: function() {
+    		return urlHash[tabId.toString()];
+    	}
+    };
+})();
 
 //when tab is created, get the tab id and set the date
 chrome.tabs.onCreated.addListener(function(tabInfo) {
-	//getCreatedTabInfo(addStartTime, tabInfo.id, 1);
 	addStartTime(tabInfo.id);
 });
 
@@ -40,35 +25,9 @@ chrome.tabs.onCreated.addListener(function(tabInfo) {
 //when tab is updated - change the url associated with the tabId to the new one
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tabInfo) {
 	if (changeInfo.status === 'complete') {
-		console.log(urlHash);
-		urlHash[tabId.toString()] = tabInfo.url;
-		//var curUrlHash = addToUrlHash(tabId, tabInfo);
-		//curUrlHash();
-		addUrlToList(tabId);
-		//console.log(addToUrlHash(tabId, tabInfo));
+		add.addUrl(tabId, tabInfo);
 	}
 });
-		
-/*
-//gets the id of the current tab
-function getCreatedTabIn(addStartTime, tabId, createOrUpdate) {
-  var queryInfo = {
-    active: true,
-    currentWindow: true
-  };
-
-  chrome.tabs.query(queryInfo, (tabs) => {
-
-    var tab = tabs[0];
-    //console.log(tab);
-    var url = tab.url;
-
-    console.assert(typeof url == 'string', 'tab.url should be an string');
-
-    addStartTime(tabId, url);
-  })
-};
-*/
 
 //sets the current timestamp in storage
 function addStartTime(tabID) {
@@ -80,6 +39,8 @@ function addStartTime(tabID) {
 	})
 };
 
+//need to add to html list to display
+/*
 function addUrlToList(tabID) {
 	var stringId = tabID.toString();
 			console.log(urlHash);
@@ -88,6 +49,12 @@ function addUrlToList(tabID) {
 		console.log(urlHash.stringId);
 	});
 };
+
+function addUrlToList(tabId) {
+	var stringId = tabId.toString();
+	var currentUrl = add()
+}
+*/
 
 
 
