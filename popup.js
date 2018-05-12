@@ -13,24 +13,24 @@ function getAllTabIds(callback) {
 
     callback(ids);
   });
-}
+};
 
-function addTabToList(idList) {
+function addTabToList() {
   var backgroundPage = chrome.extension.getBackgroundPage();
   var tabHash = backgroundPage.add.getUrlHash();
-  console.log(tabHash);
 
   var tabList = document.getElementById("tabList");
-  for (i = 0; i < idList.length; i++) {
-    var id = idList[i];
-    var url = tabHash[id];
+  for (i = 0; i < tabHash.length; i++) {
+    var id = tabHash[i].id;
+    var url = tabHash[i].url;
     var li = document.createElement("li"); //create a list element
-    li.setAttribute("id", id.toString()); //set list element to tabId to access later
+    li.setAttribute("id", id); //set list element to tabId to access later
     li.appendChild(document.createTextNode(url)); //add url to text
     tabList.appendChild(li); //append list element
   }
 };
 
 document.addEventListener('DOMContentLoaded', function() {
-  getAllTabIds(addTabToList);
+  //getAllTabIds(addTabToList);
+  addTabToList();
 });
