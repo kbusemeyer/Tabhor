@@ -3,6 +3,9 @@ one problem is that it will include new tabs - but tab id is the same
 so when displaying can get tab id and get current value of the tab\
 */
 
+//var windows = chrome.extension.getViews({type: "popup"});
+//console.log(windows);
+
 //adds the url to the urlHash
 var add = (function () {
     var urlHash = {};
@@ -10,8 +13,8 @@ var add = (function () {
     	addUrl: function(tabId, tabInfo) {
     		return urlHash[tabId.toString()] = tabInfo.url;
     	},
-    	getUrl: function() {
-    		return urlHash[tabId.toString()];
+    	getUrlHash: function() {
+    		return urlHash;
     	}
     };
 })();
@@ -26,8 +29,20 @@ chrome.tabs.onCreated.addListener(function(tabInfo) {
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tabInfo) {
 	if (changeInfo.status === 'complete') {
 		add.addUrl(tabId, tabInfo);
+		//addUrlToList(tabId, tabInfo);
+		/*
+		chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+			console.log("hi");
+			if (request.greeting === "addUrlToList") {
+				console.log("here");
+				sendResponse(tabInfo);		
+			}
+		}); 
+		*/
 	}
 });
+
+
 
 //sets the current timestamp in storage
 function addStartTime(tabID) {
@@ -39,22 +54,21 @@ function addStartTime(tabID) {
 	})
 };
 
-//need to add to html list to display
-/*
-function addUrlToList(tabID) {
-	var stringId = tabID.toString();
-			console.log(urlHash);
-	var curTabUrl = chrome.storage.sync.get(stringId, function(urlHash) {
-		console.log(urlHash);
-		console.log(urlHash.stringId);
-	});
-};
 
-function addUrlToList(tabId) {
-	var stringId = tabId.toString();
-	var currentUrl = add()
-}
-*/
+//don't think it's looking at my chrome extension html
+function addUrlToList(tabId, tabUrl) {
+	//get the html list
+	//execute a script to get it or add it because not registering want popup html affected
+	//var windows = chrome.extension.getViews({type: "popup"});
+	//console.log(windows);
+	//var tabList = windows.document.getElementById("tabList");
+	//console.log(tabList);
+	//var li = windows.document.createElement("li"); //create a list element
+	//li.setAttribute("id", tabId.toString()); //set list element to tabId to access later
+	//li.appendChild(document.createTextNode(tabUrl)); //add url to text
+	//tabList.appendChild(li); //append list element
+	//chrome.runtime.sendMessage(tabId, tabUrl);
+};
 
 
 

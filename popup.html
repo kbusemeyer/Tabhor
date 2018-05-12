@@ -23,17 +23,20 @@
         justify-content: space-between;
       }
     </style>
-
-    <!--
-      - JavaScript and HTML must be in separate files: see our Content Security
-      - Policy documentation[1] for details and explanation.
-      -
-      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-    -->
-    <script src="popup.js"></script>
   </head>
 
   <body>
+    <h1>Current Tabs Open</h1>
+    <div id="container">
+      <ul id="tabList">
+      </ul>
+    </div>
+  </body>
+ <script src="popup.js"></script>
+</html>
+
+<!--
+<body>
     <h1>Background Color Changer</h1>
     <div id="container">
       <span>Choose a color</span>
@@ -46,4 +49,6 @@
       </select>
     </div>
   </body>
-</html>
+   <script src="popup.js"></script>
+  </html>
+-->
