@@ -6,23 +6,25 @@ var add = (function () {
     	addUrl: function(tabId, tabInfo) {
     		var tab = {
     			id: tabId.toString(),
-    			url: tabInfo.url
+    			url: (findEndOfUrl(tabInfo.url) === -1) ? tabInfo.url : tabInfo.url.substring(0, findEndOfUrl(tabInfo.url)),
+    			openTime: new Date;
     		};
     		urlHash.push(tab);
+    		console.log(tab.url);
     		return urlHash.tab;
     	},
+    	updateUrl: function(tabId, tabInfo) {
+
+    	}
     	getUrlHash: function() {
-    		console.log("here from popup")
-    		console.log(urlHash);
     		return urlHash;
     	},
     	addCurOpenUrl: function(tabsInfo) {
     		for (i = 0; i < tabsInfo.length; i++) {
     			urlHash.push(tabsInfo[i]);
-    			console.log(urlHash);
     		};
     		return urlHash;
-    	};
+    	}
     };
 })();
 
@@ -46,6 +48,11 @@ function getCurTabIds(callback) {
   });
 };
 
+function findEndOfUrl(url) {
+	var ind = url.indexOf(".com");
+	return ind;
+}
+
 //when the app is first installed, add the currently open tabs to the tabHash
 chrome.runtime.onInstalled.addListener(function(details) {
 	//want this to happen everytime? users can't reload?
@@ -58,6 +65,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 //when tab is created, get the tab id and set the date
 chrome.tabs.onCreated.addListener(function(tabInfo) {
 	addStartTime(tabInfo.id);
+	add.addUrl(tabInfo);
 });
 
 
@@ -68,16 +76,18 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tabInfo) {
 	};
 });
 
+/*
 //sets the current timestamp in storage
 function addStartTime(tabID) {
 	var firstOpened = new Date;
 	var stringId = tabID.toString();
 	chrome.storage.sync.set({stringId : firstOpened}, function() {
-		//var urlList = document.getElementById("urlList");
-		console.log(tabID + " " + firstOpened)
+		console.log(tabID + ": " + firstOpened)
 	})
 };
+*/
 
+//after .com, then nix
 
 
 
