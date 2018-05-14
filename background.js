@@ -5,7 +5,11 @@ var tabMethods = (function () {
     return { 
     	//adds the original url when a tab is created
     	addUrl: function(tabInfo) {
-    		urlMap.set(tabInfo.id, tabInfo.url);
+    		var tab = {
+    			url: tabInfo.url,
+    			openTime: new Date
+    		}
+    		urlMap.set(tabInfo.id, tab);
     		return tabInfo.id;
     	},
     	//returns the urlHash
@@ -15,7 +19,11 @@ var tabMethods = (function () {
     	//adds the tabs that are open when the extension is initially installed/updated
     	addCurOpenUrl: function(tabsInfo, tabIds) {
     		for (i = 0; i < tabsInfo.length; i++) {
-    			urlMap.set(tabsInfo[i][0], tabsInfo[i][1]);
+    			var tab = {
+    				url: tabsInfo[i][1],
+    				openTime: new Date
+    			}
+    			urlMap.set(tabsInfo[i][0], tab);
     		};
     		return urlMap;
     	},
@@ -30,18 +38,6 @@ var tabMethods = (function () {
     				continue;
     			}
     		}
-
-/*
-    		for (i = 0; i < ids.size; i++) {
-    			console.log("here");
-    			if (!(curTabIds.includes(ids[i]))) {
-    				urlMap.delete(ids[i]);
-    			}
-    			else {
-    				continue;
-    			}
-    		}
-    		*/
     		return urlMap;
     	}
     };
@@ -94,7 +90,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
 //when tab is created, get the tab id and set the date
 chrome.tabs.onCreated.addListener(function(tabInfo) {
-	addStartTime(tabInfo.id);
+	//addStartTime(tabInfo.id);
 	tabMethods.addUrl(tabInfo)
 });
 
@@ -113,14 +109,38 @@ chrome.tabs.onActiveChanged.addListener(function(tabId, selectInfo) {
 });
 
  //sets the current timestamp in storage
- function addStartTime(tabID) {
+function addStartTime(tabID) {
  	var firstOpened = new Date;
  	var stringId = tabID.toString();
- 	chrome.storage.sync.set({stringId : firstOpened}, function() {
- 		//var urlList = document.getElementById("urlList");
+ 	chrome.storage.sync.set({tabID : firstOpened}, function() {
  		console.log(tabID + " " + firstOpened)
  	})
  };
 
+ function calculateTimeSinceOpened(time) {
+ 	var msPerDay = 1000 * 60 * 60 * 24;
+
+ 	var now = new Date;
+ 	var utcTime = Date.UTC(time.getFullYear(), time.getMonth(), time.getDate(), time.getHours(), 
+ 		time.getMinutes(), time.getSeconds(), time.getMilliseconds());
+ 	var utcNow = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(),
+ 		 now.getMinutes(), now.getSeconds(),now.getMilliseconds());
+
+ 	console.log(utcTime);
+ 	console.log(utcNow);
+ 	console.log("here");
+ 	return msToTime(Math.floor(utcNow - utcTime));
+ };
+
+ function msToTime(s) {
+  var ms = s % 1000;
+  s = (s - ms) / 1000;
+  var secs = s % 60;
+  s = (s - secs) / 60;
+  var mins = s % 60;
+  var hrs = (s - mins) / 60;
+
+  return hrs + ':' + mins + ':' + secs;
+};
 
 
