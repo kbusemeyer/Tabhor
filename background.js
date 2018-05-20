@@ -7,7 +7,8 @@ var tabMethods = (function () {
     	addUrl: function(tabInfo) {
     		var tab = {
     			url: tabInfo.url,
-    			openTime: new Date
+    			openTime: new Date,
+    			favIconUrl: tabInfo.favIconUrl
     		}
     		urlMap.set(tabInfo.id, tab);
     		return tabInfo.id;
@@ -21,7 +22,8 @@ var tabMethods = (function () {
     		for (i = 0; i < tabsInfo.length; i++) {
     			var tab = {
     				url: tabsInfo[i][1],
-    				openTime: new Date
+    				openTime: new Date,
+    				favIconUrl: tabsInfo[i][3]
     			}
     			urlMap.set(tabsInfo[i][0], tab);
     		};
@@ -59,6 +61,7 @@ function getCurTabs(callback) {
     	var addTab = [];
     	ids.push(tab.id);
     	addTab.push(tab.id, findEndOfUrl(tab.url));
+    	addTab.push(tab.id, tab.favIconUrl);
       	tabsInfo.push(addTab);
     });
     callback(tabsInfo, ids);
@@ -93,10 +96,10 @@ chrome.runtime.onInstalled.addListener(function(details) {
 });
 
 function setIndicatorTimes() {
-	chrome.storage.local.set({"red", 86400000}, function() {
+	chrome.storage.local.set({"red": 86400000}, function() {
 		console.log("red set");
 	});
-	chrome.storage.local.set({"red", 43200000}, function() {
+	chrome.storage.local.set({"red": 43200000}, function() {
 		console.log("yellow set");
 	});
 	/*
@@ -108,23 +111,20 @@ function setIndicatorTimes() {
 
 function getIndicatorTimes(tabId) {
 	chrome.storage.local.get(["red", "yellow"], function(result) {
-		//console.log("red is " + result.red);
 		setStatus(tabId, result.red, result.yellow);
 	});
-}
+};
 
 //when tab is created, get the tab id and set the date
 chrome.tabs.onCreated.addListener(function(tabInfo) {
 	tabMethods.addUrl(tabInfo);
-	setStatus(tabId, 0);
+	setStatus(tabInfo.id, 0);
 });
 
 //when tab is updated - change the url associated with the tabId to the new one
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tabInfo) {
-
 	if (changeInfo.status === 'complete') {
 		tabMethods.addUrl(tabInfo);
-		setStatus(tabId); //sets initially but needs to update on time
 	};
 });
 
@@ -164,6 +164,15 @@ function msToTime(s) {
 
 function setStatus(tabId, red, yellow) {
 	var msOpen = calculateTimeSinceOpened(tabMethods.getTab(tabId).openTime, 1);
+	var tabFavicon = tabMethods.getTab(tabId).favIconUrl;
+	chrome.tabs.executeScript(tabId, {file: "contentscript.js"}, function(){
+        chrome.tabs.sendMessage(tabId, {scriptOptions: {redzone: red, yellowzone: yellow, open: msOpen, url: tabFavicon}}, 
+        	function(){
+            //all injected
+     });
+    });
+	/*
+	var msOpen = calculateTimeSinceOpened(tabMethods.getTab(tabId).openTime, 1);
 	if (msOpen >= red) { //greater than red
 		chrome.tabs.executeScript(tabId, { 
 			code: 'document.querySelector(\'link[rel*="icon"]\').href = chrome.extension.getURL("indicators/red.ico")'
@@ -179,6 +188,7 @@ function setStatus(tabId, red, yellow) {
 			code: 'document.querySelector(\'link[rel*="icon"]\').href = chrome.extension.getURL("indicators/green.ico")'
 		});
 	}
+	*/
 };
 
 //for timer every second update it

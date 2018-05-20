@@ -24,7 +24,8 @@
   	"https://*/"
 	],
 	"web_accessible_resources": [ //why can't I put these in a folder
-		"indicators/*.ico"
+		"indicators/*.ico",
+		"contentscript.js"
 		//"red.ico",
 		//"yellow.ico",
 		//"green.ico"
