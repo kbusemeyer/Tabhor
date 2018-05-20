@@ -137,8 +137,12 @@ chrome.tabs.onActiveChanged.addListener(function(tabId, selectInfo) {
 
 function setStatus(tabId) {
 	chrome.tabs.executeScript(tabId, { 
-		code: 'document.querySelector("link[rel*="icon"]").href = "blue.ico"'
-	});
-}
+		code: 'document.querySelector(\'link[rel*="icon"]\').href = chrome.extension.getURL("green.ico")'
+	}, receiveText);
+};
+
+function receiveText(results) {
+	console.log(results[0]);
+};
 
 
