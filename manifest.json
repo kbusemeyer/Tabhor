@@ -23,7 +23,10 @@
     "http://*/",
   	"https://*/"
 	],
-	"web_accessible_resources": [
-		"Indicators/*"
+	"web_accessible_resources": [ //why can't I put these in a folder
+		"indicators/*.ico"
+		//"red.ico",
+		//"yellow.ico",
+		//"green.ico"
 	]
 }

@@ -18,7 +18,7 @@ function addTabToList() {
     var boldUrl = document.createElement("b"); //creates a bold element
     boldUrl.textContent = tabMap.get(id).url; //bolds the url
 
-    var timestamp = backgroundPage.calculateTimeSinceOpened(tabMap.get(id).openTime); //gets the timestamp
+    var timestamp = backgroundPage.calculateTimeSinceOpened(tabMap.get(id).openTime, 0); //gets the timestamp
     var li = document.createElement("li"); //create a list element
     li.setAttribute("id", id); //set list element to tabId to access if needed
 
@@ -41,7 +41,7 @@ function getTimes() {
 
   for (var id of tabMap.keys()) {
     var tab = document.getElementById("span" + id.toString());
-    var timestamp = backgroundPage.calculateTimeSinceOpened(tabMap.get(id).openTime);
+    var timestamp = backgroundPage.calculateTimeSinceOpened(tabMap.get(id).openTime, 0);
     tab.textContent = timestamp;
   }
 };

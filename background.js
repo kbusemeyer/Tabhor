@@ -7,8 +7,7 @@ var tabMethods = (function () {
     	addUrl: function(tabInfo) {
     		var tab = {
     			url: tabInfo.url,
-    			openTime: new Date,
-    			favIcon: tabInfo.favIconUrl
+    			openTime: new Date
     		}
     		urlMap.set(tabInfo.id, tab);
     		return tabInfo.id;
@@ -43,7 +42,7 @@ var tabMethods = (function () {
     	},
     	getTab: function(tabId) {
     		return urlMap.get(tabId);
-    		}
+    	}
     }
 })();
 
@@ -88,13 +87,36 @@ chrome.runtime.onInstalled.addListener(function(details) {
 	//want this to happen everytime? users can't reload?
 	if (details.reason === "install" || details.reason === "update") { 
 		getCurTabs(tabMethods.addCurOpenUrl);
+		setIndicatorTimes();
 	};
 	//need to add start time too
 });
 
+function setIndicatorTimes() {
+	chrome.storage.local.set({"red", 86400000}, function() {
+		console.log("red set");
+	});
+	chrome.storage.local.set({"red", 43200000}, function() {
+		console.log("yellow set");
+	});
+	/*
+	chrome.storage.local.set({"red", 0}, function() {
+		console.log("green set");
+	});
+	*/
+};
+
+function getIndicatorTimes(tabId) {
+	chrome.storage.local.get(["red", "yellow"], function(result) {
+		//console.log("red is " + result.red);
+		setStatus(tabId, result.red, result.yellow);
+	});
+}
+
 //when tab is created, get the tab id and set the date
 chrome.tabs.onCreated.addListener(function(tabInfo) {
 	tabMethods.addUrl(tabInfo);
+	setStatus(tabId, 0);
 });
 
 //when tab is updated - change the url associated with the tabId to the new one
@@ -102,7 +124,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tabInfo) {
 
 	if (changeInfo.status === 'complete') {
 		tabMethods.addUrl(tabInfo);
-		setStatus(tabId);
+		setStatus(tabId); //sets initially but needs to update on time
 	};
 });
 
@@ -112,7 +134,7 @@ chrome.tabs.onActiveChanged.addListener(function(tabId, selectInfo) {
 	getCurTabs(tabMethods.removeUrl);
 });
 
- function calculateTimeSinceOpened(time) {
+function calculateTimeSinceOpened(time, num) {
  	var msPerDay = 1000 * 60 * 60 * 24;
 
  	var now = new Date;
@@ -121,10 +143,15 @@ chrome.tabs.onActiveChanged.addListener(function(tabId, selectInfo) {
  	var utcNow = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(),
  		 now.getMinutes(), now.getSeconds(),now.getMilliseconds());
 
- 	return msToTime(Math.floor(utcNow - utcTime));
+ 	if (num === 0) {
+ 		return msToTime(Math.floor(utcNow - utcTime));
+ 	}
+ 	else {
+ 		return Math.floor(utcNow - utcTime);
+ 	}
  };
 
- function msToTime(s) {
+function msToTime(s) {
   var ms = s % 1000;
   s = (s - ms) / 1000;
   var secs = s % 60;
@@ -135,14 +162,33 @@ chrome.tabs.onActiveChanged.addListener(function(tabId, selectInfo) {
   return hrs + ':' + mins + ':' + secs;
 };
 
-function setStatus(tabId) {
-	chrome.tabs.executeScript(tabId, { 
-		code: 'document.querySelector(\'link[rel*="icon"]\').href = chrome.extension.getURL("green.ico")'
-	}, receiveText);
+function setStatus(tabId, red, yellow) {
+	var msOpen = calculateTimeSinceOpened(tabMethods.getTab(tabId).openTime, 1);
+	if (msOpen >= red) { //greater than red
+		chrome.tabs.executeScript(tabId, { 
+			code: 'document.querySelector(\'link[rel*="icon"]\').href = chrome.extension.getURL("indicators/red.ico")'
+		});
+	}
+	else if (msOpen >= yellow) { //greater than yellow
+		chrome.tabs.executeScript(tabId, { 
+			code: 'document.querySelector(\'link[rel*="icon"]\').href = chrome.extension.getURL("indicators/yellow.ico")'
+		});
+	}
+	else {
+		chrome.tabs.executeScript(tabId, { 
+			code: 'document.querySelector(\'link[rel*="icon"]\').href = chrome.extension.getURL("indicators/green.ico")'
+		});
+	}
 };
 
-function receiveText(results) {
-	console.log(results[0]);
-};
+//for timer every second update it
+setInterval(function() {
+	var urls = tabMethods.getUrlMap();
+	for (var id of urls.keys()) {
+		getIndicatorTimes(id);
+	}
+}, 1000);
+
+//need to convert user input to milliseconds later
 
 
