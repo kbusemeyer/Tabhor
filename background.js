@@ -7,7 +7,8 @@ var tabMethods = (function () {
     	addUrl: function(tabInfo) {
     		var tab = {
     			url: tabInfo.url,
-    			openTime: new Date
+    			openTime: new Date,
+    			favIcon: tabInfo.favIconUrl
     		}
     		urlMap.set(tabInfo.id, tab);
     		return tabInfo.id;
@@ -39,8 +40,11 @@ var tabMethods = (function () {
     			}
     		}
     		return urlMap;
-    	}
-    };
+    	},
+    	getTab: function(tabId) {
+    		return urlMap.get(tabId);
+    		}
+    }
 })();
 
 function getCurTabs(callback) {
@@ -90,8 +94,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
 
 //when tab is created, get the tab id and set the date
 chrome.tabs.onCreated.addListener(function(tabInfo) {
-	//addStartTime(tabInfo.id);
-	tabMethods.addUrl(tabInfo)
+	tabMethods.addUrl(tabInfo);
 });
 
 //when tab is updated - change the url associated with the tabId to the new one
@@ -99,6 +102,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tabInfo) {
 
 	if (changeInfo.status === 'complete') {
 		tabMethods.addUrl(tabInfo);
+		setStatus(tabId);
 	};
 });
 
@@ -107,15 +111,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tabInfo) {
 chrome.tabs.onActiveChanged.addListener(function(tabId, selectInfo) {
 	getCurTabs(tabMethods.removeUrl);
 });
-
- //sets the current timestamp in storage
-function addStartTime(tabID) {
- 	var firstOpened = new Date;
- 	var stringId = tabID.toString();
- 	chrome.storage.sync.set({tabID : firstOpened}, function() {
- 		console.log(tabID + " " + firstOpened)
- 	})
- };
 
  function calculateTimeSinceOpened(time) {
  	var msPerDay = 1000 * 60 * 60 * 24;
@@ -126,9 +121,6 @@ function addStartTime(tabID) {
  	var utcNow = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(),
  		 now.getMinutes(), now.getSeconds(),now.getMilliseconds());
 
- 	console.log(utcTime);
- 	console.log(utcNow);
- 	console.log("here");
  	return msToTime(Math.floor(utcNow - utcTime));
  };
 
@@ -142,5 +134,11 @@ function addStartTime(tabID) {
 
   return hrs + ':' + mins + ':' + secs;
 };
+
+function setStatus(tabId) {
+	chrome.tabs.executeScript(tabId, { 
+		code: 'document.querySelector("link[rel*="icon"]").href = "blue.ico"'
+	});
+}
 
 
